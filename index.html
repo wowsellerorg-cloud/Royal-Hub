@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Royal Hub — Smart Tempered Glass Inventory</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .tab-active {
+      background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    }
+    .tab-inactive {
+      background-color: transparent;
+      color: #64748b;
+    }
+    .dark .tab-inactive {
+      color: #94a3b8;
+    }
+    .tab-inactive:hover {
+      background-color: rgba(148, 163, 184, 0.14);
+    }
+  </style>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f172a" />
+</head>
+<body class="min-h-screen pb-20 bg-[#f4f6fb] text-slate-900 dark:bg-[#090d16] dark:text-slate-100 transition-colors duration-200">
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-30 bg-white/95 dark:bg-[#0f1623]/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800/90 shadow-sm">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <!-- Royal Hub Creator Logo -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-amber-500 p-[2px] shadow-md shrink-0">
+          <div class="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center relative overflow-hidden">
+            <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none">
+              <defs>
+                <linearGradient id="rhGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#fbbf24" />
+                  <stop offset="100%" stop-color="#60a5fa" />
+                </linearGradient>
+              </defs>
+              <rect x="7" y="3" width="18" height="26" rx="4" stroke="url(#rhGrad)" stroke-width="2.2" />
+              <path d="M10.5 14.5L13 17L16 12L19 17L21.5 14.5L20.5 20.5H11.5L10.5 14.5Z" fill="#fbbf24" />
+              <line x1="13" y1="24.5" x2="19" y2="24.5" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white leading-none">Royal Hub</h1>
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-amber-500/20 to-indigo-500/20 text-amber-700 dark:text-amber-300 border border-amber-400/30">PRO</span>
+          </div>
+          <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Glass Stock &amp; AI Scanner</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="quickThemeBtn" type="button" title="Dark / Light Theme" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-300 flex items-center justify-center border border-slate-200 dark:border-slate-700 transition">
+          <svg id="quickThemeSvg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+        <button id="openSettingsBtn" type="button" class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-xs font-bold text-white shadow-sm transition">
+          <span id="aiStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1.02 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-3xl mx-auto px-4 pb-3">
+      <div class="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-800/90 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+        <button type="button" data-tab="check" class="nav-tab tab-active py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+          </svg>
+          <span>Glass Check</span>
+        </button>
+        <button type="button" data-tab="add" class="nav-tab tab-inactive py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span>Add Glass</span>
+        </button>
+        <button type="button" data-tab="inventory" class="nav-tab tab-inactive py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          </svg>
+          <span>Stock (<span id="navCount">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden max-w-sm w-[92%]">
+    <div id="toastInner" class="px-4 py-3 rounded-2xl shadow-xl text-sm font-semibold text-white bg-slate-900 flex items-center justify-between gap-2">
+      <span id="toastMsg"></span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-3xl mx-auto px-4 pt-4 space-y-4">
+
+    <!-- ==================== TAB 1: GLASS CHECK ==================== -->
+    <section id="tab-check" class="space-y-4">
+      <div class="bg-white dark:bg-[#111827] rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 dark:border-slate-800 space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">Customer Mobile Check</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Model likh kar Check karein ya Phone ki photo Camera/Gallery se daalein.</p>
+          </div>
+          <span id="aiModeBadge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 shrink-0">OCR Mode</span>
+        </div>
+
+        <!-- Search Input + Check Button -->
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <input id="checkSearchInput" type="text" placeholder="Model likhein (jaise: V29, Note 12, iPhone 15)..." class="w-full pl-10 pr-16 py-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm font-semibold transition" />
+            <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+            <button id="clearCheckBtn" type="button" class="hidden absolute right-2.5 top-3 px-2 py-1 text-xs font-bold text-slate-600 dark:text-slate-200 bg-slate-200/80 dark:bg-slate-700 rounded-lg">Clear</button>
+          </div>
+          <button id="manualCheckBtn" type="button" class="px-4 sm:px-5 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-sm font-extrabold shadow-md shadow-indigo-500/20 transition shrink-0">
+            Check
+          </button>
+        </div>
+
+        <!-- Quick Brand Chips -->
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" data-quick-brand="Vivo " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">Vivo</button>
+          <button type="button" data-quick-brand="Redmi " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">Redmi</button>
+          <button type="button" data-quick-brand="Samsung " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">Samsung</button>
+          <button type="button" data-quick-brand="iPhone " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">iPhone</button>
+          <button type="button" data-quick-brand="Realme " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">Realme</button>
+          <button type="button" data-quick-brand="OnePlus " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">OnePlus</button>
+          <button type="button" data-quick-brand="iQOO " class="quick-brand-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-xs font-bold text-slate-700 dark:text-slate-300 transition">iQOO</button>
+        </div>
+
+        <!-- Photo Check Box (Separate Camera + Gallery) -->
+        <div class="border-2 border-dashed border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-b from-indigo-50/70 to-blue-50/30 dark:from-indigo-950/30 dark:to-slate-900 rounded-2xl p-4 text-center space-y-3">
+          <input id="phoneCameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
+          <input id="phoneGalleryInput" type="file" accept="image/*" class="hidden" />
+
+          <div id="phonePreviewWrap" class="hidden space-y-2">
+            <img id="phonePreviewImg" alt="Customer phone preview" class="max-h-48 mx-auto rounded-2xl object-contain border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 shadow-sm" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button id="pickPhoneCameraBtn" type="button" class="py-3 px-3 rounded-2xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span>Camera Photo</span>
+            </button>
+            <button id="pickPhoneGalleryBtn" type="button" class="py-3 px-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <span>Gallery Upload</span>
+            </button>
+          </div>
+          <p id="phoneScanStatus" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            Phone ke back camera se model pehchanne ke liye <strong>Settings me Gemini AI Key</strong> daalein, warna phone ke Settings screen ki photo ya upar model naam likh kar Check dabayein.
+          </p>
+        </div>
+      </div>
+
+      <!-- Check Results Area -->
+      <div id="checkResultsContainer" class="space-y-3"></div>
+    </section>
+
+    <!-- ==================== TAB 2: ADD GLASS (OCR / AI) ==================== -->
+    <section id="tab-add" class="hidden space-y-4">
+      <div class="bg-white dark:bg-[#111827] rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 dark:border-slate-800 space-y-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">Naya Glass Add Karein</h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Glass packet par likhe 10+ models ki photo Camera ya Gallery se upload karein.</p>
+        </div>
+
+        <!-- Packet Image Upload (Camera + Gallery) -->
+        <div class="border-2 border-dashed border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl p-4 text-center space-y-3">
+          <input id="packetCameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
+          <input id="packetGalleryInput" type="file" accept="image/*" class="hidden" />
+          <div id="packetPreviewWrap" class="hidden">
+            <img id="packetPreviewImg" alt="Glass packet preview" class="max-h-52 mx-auto rounded-2xl object-contain border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 shadow-sm" />
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button id="pickPacketCameraBtn" type="button" class="py-3 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2">
+              <span>📷</span>
+              <span>Packet Camera</span>
+            </button>
+            <button id="pickPacketGalleryBtn" type="button" class="py-3 px-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2">
+              <span>🖼️</span>
+              <span>Gallery Upload</span>
+            </button>
+          </div>
+          <button id="scanPacketBtn" type="button" class="hidden w-full py-3 rounded-2xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white text-sm font-bold transition">
+            ✨ Photo se Models Padho
+          </button>
+          <div id="ocrProgressWrap" class="hidden space-y-1.5 max-w-xs mx-auto">
+            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+              <div id="ocrProgressBar" class="bg-emerald-500 h-2 transition-all duration-200" style="width: 0%"></div>
+            </div>
+            <p id="ocrProgressText" class="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Photo padh raha hai...</p>
+          </div>
+        </div>
+
+        <!-- Glass Details Form -->
+        <form id="addGlassForm" class="space-y-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Glass Code / Box Name *</label>
+              <input id="glassCodeInput" type="text" required placeholder="e.g. 11D-A14" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Glass Type</label>
+              <select id="glassTypeInput" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none">
+                <option value="11D Clear">11D Clear</option>
+                <option value="OG Gorilla">OG Gorilla</option>
+                <option value="Matte Gaming">Matte Gaming</option>
+                <option value="Privacy">Privacy</option>
+                <option value="UV Curved">UV Curved</option>
+                <option value="Super D">Super D</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Quantity (Pieces) *</label>
+              <input id="glassQtyInput" type="number" min="0" value="10" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Rack / Box Location</label>
+              <input id="glassRackInput" type="text" placeholder="e.g. Rack B - Shelf 2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Selling Price (₹)</label>
+              <input id="glassPriceInput" type="number" min="0" value="150" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Compatible Mobile Models *</label>
+              <button id="fillSamplePacketBtn" type="button" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Sample 10 Models Bharein</button>
+            </div>
+            <textarea id="glassModelsInput" rows="4" required placeholder="Redmi Note 12, Poco X5, Realme 10 Pro, Vivo T2, iQOO Z7..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-md shadow-indigo-500/20 transition">
+            💾 Royal Hub Inventory Me Save Karein
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: INVENTORY LIST ==================== -->
+    <section id="tab-inventory" class="hidden space-y-4">
+      <div class="grid grid-cols-3 gap-2.5">
+        <div class="bg-white dark:bg-[#111827] p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div id="statBoxes" class="text-xl font-extrabold text-slate-900 dark:text-white">0</div>
+          <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Glass Boxes</div>
+        </div>
+        <div class="bg-white dark:bg-[#111827] p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div id="statPieces" class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">0</div>
+          <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Total Pieces</div>
+        </div>
+        <div class="bg-white dark:bg-[#111827] p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div id="statModels" class="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">0</div>
+          <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Models Covered</div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-[#111827] p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between shadow-sm">
+        <input id="invFilterInput" type="text" placeholder="Inventory me code ya model dhundhein..." class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-indigo-500" />
+        <div class="flex gap-2">
+          <button id="exportJsonBtn" type="button" class="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition">Export Backup</button>
+          <button id="resetDemoBtn" type="button" class="px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold transition border border-amber-200 dark:border-amber-500/30">Reset Demo</button>
+        </div>
+      </div>
+
+      <div id="inventoryListContainer" class="space-y-3"></div>
+    </section>
+  </main>
+
+  <!-- ==================== SETTINGS MODAL ==================== -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Royal Hub Settings</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Theme, AI Vision aur Backup</p>
+        </div>
+        <button id="closeSettingsBtn" type="button" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-lg font-bold flex items-center justify-center">&times;</button>
+      </div>
+
+      <!-- Dark Theme Switch -->
+      <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+        <div>
+          <div class="text-sm font-bold text-slate-900 dark:text-white">🌙 Dark Theme</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400">Trading style dark look on/off karein</div>
+        </div>
+        <button id="themeToggleBtn" type="button" role="switch" aria-checked="false" class="relative inline-flex h-7 w-12 items-center rounded-full bg-slate-300 dark:bg-indigo-600 transition-colors">
+          <span id="themeToggleKnob" class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-1 dark:translate-x-6"></span>
+        </button>
+      </div>
+
+      <!-- AI Vision Key -->
+      <div class="space-y-2.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+        <div class="text-sm font-bold text-slate-900 dark:text-white">✨ AI Phone Scanner (Gemini Key)</div>
+        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+          Phone ki photo (jaise Vivo V29 ka back camera) dekh kar model pehchanne ke liye free Gemini API Key yahan daalein:
+        </p>
+        <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-indigo-500" />
+        <div class="flex gap-2">
+          <button id="saveApiKeyBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition">Save Key</button>
+          <button id="clearApiKeyBtn" type="button" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition">Remove</button>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button id="settingsExportBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition">
+          📥 Download Backup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'royalhub_inventory_v1';
+      const OLD_STORAGE_KEY = 'glassstock_inventory_v1';
+      const API_KEY_STORAGE = 'royalhub_gemini_key';
+      const THEME_STORAGE = 'royalhub_theme';
+
+      const DEFAULT_INVENTORY = [
+        {
+          id: 'g1',
+          code: '11D-RM12',
+          type: '11D Clear',
+          qty: 14,
+          rack: 'Rack A - Box 1',
+          price: 150,
+          models: [
+            'Redmi Note 12 4G', 'Redmi Note 12 5G', 'Poco X5 5G', 'Poco X5 Pro',
+            'Redmi Note 12 Pro', 'Realme 10 Pro', 'Realme 11 Pro', 'Vivo T2 5G',
+            'iQOO Z7 5G', 'Redmi 12 5G', 'Poco M6 Pro'
+          ]
+        },
+        {
+          id: 'g2',
+          code: 'OG-SAM-A14',
+          type: 'OG Gorilla',
+          qty: 8,
+          rack: 'Rack A - Box 4',
+          price: 200,
+          models: [
+            'Samsung A14 5G', 'Samsung A15 5G', 'Samsung M14 5G', 'Samsung F14 5G',
+            'Samsung A24', 'Samsung A25 5G', 'Samsung M34 5G', 'Samsung F34 5G',
+            'Samsung A34 5G', 'Samsung A54 5G'
+          ]
+        },
+        {
+          id: 'g3',
+          code: 'MATTE-V29',
+          type: 'Matte Gaming',
+          qty: 5,
+          rack: 'Rack B - Box 2',
+          price: 250,
+          models: [
+            'Vivo V29', 'Vivo V29 Pro', 'Vivo V27', 'Vivo V27 Pro',
+            'iQOO Z7 Pro', 'Vivo T2 Pro', 'OnePlus Nord CE 3', 'OnePlus Nord 3',
+            'Realme Narzo 60 Pro', 'Realme 11 Pro Plus'
+          ]
+        },
+        {
+          id: 'g4',
+          code: 'SUPERD-IP15',
+          type: 'Super D',
+          qty: 11,
+          rack: 'Rack C - Box 1',
+          price: 300,
+          models: [
+            'iPhone 15', 'iPhone 15 Pro', 'iPhone 14', 'iPhone 14 Pro',
+            'iPhone 13', 'iPhone 13 Pro', 'iPhone 16', 'iPhone 12',
+            'iPhone 12 Pro', 'iPhone 16e'
+          ]
+        },
+        {
+          id: 'g5',
+          code: 'PRIV-OP11',
+          type: 'Privacy',
+          qty: 0,
+          rack: 'Rack B - Box 6',
+          price: 280,
+          models: [
+            'OnePlus 11R', 'OnePlus 12R', 'OnePlus Nord CE 4', 'Oppo Reno 10',
+            'Oppo Reno 11', 'Realme GT Neo 3', 'Realme 12 Pro', 'Vivo X90',
+            'Motorola Edge 40', 'Nothing Phone 2'
+          ]
+        }
+      ];
+
+      let inventory = [];
+      let geminiApiKey = '';
+      let isDark = false;
+      let currentPacketFile = null;
+
+      function applyTheme(dark) {
+        isDark = !!dark;
+        const html = document.documentElement;
+        if (isDark) html.classList.add('dark');
+        else html.classList.remove('dark');
+
+        const toggleBtn = document.getElementById('themeToggleBtn');
+        if (toggleBtn) toggleBtn.setAttribute('aria-checked', String(isDark));
+        try {
+          localStorage.setItem(THEME_STORAGE, isDark ? 'dark' : 'light');
+        } catch (e) {}
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            inventory = (Array.isArray(parsed) && parsed.length > 0)
+              ? parsed
+              : JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+          } else {
+            inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+          }
+          geminiApiKey = localStorage.getItem(API_KEY_STORAGE) || localStorage.getItem('glassstock_gemini_key') || '';
+          const savedTheme = localStorage.getItem(THEME_STORAGE);
+          applyTheme(savedTheme === 'dark');
+        } catch (e) {
+          inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+          geminiApiKey = '';
+          applyTheme(false);
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
+        } catch (e) {}
+      }
+
+      function showToast(msg, isError) {
+        const box = document.getElementById('toastBox');
+        const inner = document.getElementById('toastInner');
+        const msgEl = document.getElementById('toastMsg');
+        msgEl.textContent = msg;
+        inner.className = 'px-4 py-3 rounded-2xl shadow-xl text-sm font-semibold text-white flex items-center justify-between gap-2 ' +
+          (isError ? 'bg-red-600' : 'bg-slate-900 dark:bg-indigo-600');
+        box.classList.remove('hidden');
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          box.classList.add('hidden');
+        }, 3200);
+      }
+
+      function updateAiStatusUI() {
+        const dot = document.getElementById('aiStatusDot');
+        const badge = document.getElementById('aiModeBadge');
+        if (geminiApiKey) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 shrink-0';
+          badge.textContent = 'AI Vision Active';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+          badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 shrink-0';
+          badge.textContent = 'OCR Mode';
+        }
+      }
+
+      function switchTab(tabName) {
+        document.querySelectorAll('.nav-tab').forEach((btn) => {
+          const isTarget = btn.getAttribute('data-tab') === tabName;
+          btn.className = 'nav-tab py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ' +
+            (isTarget ? 'tab-active' : 'tab-inactive');
+        });
+        ['check', 'add', 'inventory'].forEach((t) => {
+          const sec = document.getElementById('tab-' + t);
+          if (t === tabName) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        });
+        if (tabName === 'inventory') renderInventory();
+      }
+
+      function updateCounts() {
+        document.getElementById('navCount').textContent = inventory.length;
+        const totalPieces = inventory.reduce((acc, item) => acc + (Number(item.qty) || 0), 0);
+        const allModels = new Set();
+        inventory.forEach((item) => item.models.forEach((m) => allModels.add(m.toLowerCase())));
+        document.getElementById('statBoxes').textContent = inventory.length;
+        document.getElementById('statPieces').textContent = totalPieces;
+        document.getElementById('statModels').textContent = allModels.size;
+      }
+
+      function normalize(str) {
+        return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+
+      function findMatchingGlasses(query) {
+        const q = normalize(query);
+        if (!q) return [];
+        const ignoreWords = new Set(['5g', '4g', 'lte', 'phone', 'mobile', 'the', 'is', 'this', 'model']);
+        const tokens = q.split(' ').filter((t) => t && !ignoreWords.has(t));
+        const effectiveTokens = tokens.length > 0 ? tokens : q.split(' ').filter(Boolean);
+        const matches = [];
+
+        inventory.forEach((item) => {
+          const matchedModels = item.models.filter((model) => {
+            const mNorm = normalize(model);
+            if (mNorm.includes(q) || q.includes(mNorm)) return true;
+            if (effectiveTokens.length === 0) return false;
+            const hitCount = effectiveTokens.filter((tk) => mNorm.includes(tk)).length;
+            if (effectiveTokens.length === 1) return hitCount === 1;
+            return hitCount >= Math.min(2, effectiveTokens.length) || effectiveTokens.every((tk) => mNorm.includes(tk));
+          });
+          if (matchedModels.length > 0 || normalize(item.code).includes(q)) {
+            matches.push({ item, matchedModels });
+          }
+        });
+
+        matches.sort((a, b) => (b.item.qty > 0 ? 1 : 0) - (a.item.qty > 0 ? 1 : 0));
+        return matches;
+      }
+
+      function renderCheckResults(query) {
+        const container = document.getElementById('checkResultsContainer');
+        const clearBtn = document.getElementById('clearCheckBtn');
+        if (!query || !query.trim()) {
+          clearBtn.classList.add('hidden');
+          container.innerHTML = `
+            <div class="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-slate-800 text-center text-slate-500 dark:text-slate-400 text-sm">
+              Upar model ka naam likh kar <strong>Check</strong> dabayein ya phone ki photo upload karein.
+            </div>`;
+          return;
+        }
+        clearBtn.classList.remove('hidden');
+        const results = findMatchingGlasses(query);
+
+        if (results.length === 0) {
+          container.innerHTML = `
+            <div class="bg-red-50 dark:bg-red-950/40 border-2 border-red-200 dark:border-red-800 rounded-3xl p-5 text-center space-y-2">
+              <div class="text-3xl">❌</div>
+              <h3 class="text-base font-extrabold text-red-800 dark:text-red-300">Is Model Ka Glass Stock Me Nahi Hai</h3>
+              <p class="text-xs sm:text-sm text-red-700 dark:text-red-400">"${escapeHtml(query)}" ke liye koi matching tempered glass inventory me nahi mila.</p>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = results.map(({ item, matchedModels }) => {
+          const inStock = item.qty > 0;
+          return `
+            <div class="rounded-3xl p-4 sm:p-5 border-2 ${inStock ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700' : 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700'} space-y-3.5 shadow-sm">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${inStock ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}">
+                      ${inStock ? '✅ AVAILABLE' : '⚠️ OUT OF STOCK'}
+                    </span>
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${escapeHtml(item.type)}</span>
+                  </div>
+                  <h3 class="text-lg font-extrabold text-slate-900 dark:text-white mt-1.5">Box: ${escapeHtml(item.code)}</h3>
+                  <p class="text-xs text-slate-600 dark:text-slate-400">${escapeHtml(item.rack || 'Main Counter')} • ₹${Number(item.price || 0)}</p>
+                </div>
+                <div class="text-right shrink-0">
+                  <div class="text-3xl font-extrabold ${inStock ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">${item.qty}</div>
+                  <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">pcs bache</div>
+                </div>
+              </div>
+
+              <div class="bg-white/90 dark:bg-slate-900/90 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700">
+                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">Matched Model(s):</div>
+                <div class="flex flex-wrap gap-1.5">
+                  ${(matchedModels.length ? matchedModels : item.models.slice(0, 4)).map((m) =>
+                    `<span class="px-2.5 py-0.5 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 text-xs font-bold">${escapeHtml(m)}</span>`
+                  ).join('')}
+                </div>
+              </div>
+
+              ${inStock ? `
+                <div class="grid grid-cols-2 gap-2.5 pt-1">
+                  <button type="button" data-sell-id="${item.id}" class="sell-one-btn py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-extrabold shadow-sm transition flex items-center justify-center gap-1.5">
+                    <span>✅</span>
+                    <span>Buy (-1 Stock)</span>
+                  </button>
+                  <button type="button" data-notbuy-id="${item.id}" class="not-buy-btn py-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 text-sm font-extrabold transition flex items-center justify-center gap-1.5">
+                    <span>❌</span>
+                    <span>Not Buy</span>
+                  </button>
+                </div>` : ''}
+            </div>`;
+        }).join('');
+      }
+
+      function renderInventory() {
+        updateCounts();
+        const filter = normalize(document.getElementById('invFilterInput').value);
+        const container = document.getElementById('inventoryListContainer');
+        const filtered = inventory.filter((item) => {
+          if (!filter) return true;
+          if (normalize(item.code).includes(filter) || normalize(item.type).includes(filter)) return true;
+          return item.models.some((m) => normalize(m).includes(filter));
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div class="bg-white dark:bg-[#111827] rounded-2xl p-6 text-center text-sm text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800">Koi matching glass box nahi mila.</div>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map((item) => {
+          const inStock = item.qty > 0;
+          return `
+            <div class="bg-white dark:bg-[#111827] rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white">${escapeHtml(item.code)}</h3>
+                    <span class="px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">${escapeHtml(item.type)}</span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(item.rack || 'Counter')} • ₹${Number(item.price || 0)} • ${item.models.length} Models</p>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <button type="button" data-qty-id="${item.id}" data-delta="-1" class="qty-btn w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200">-</button>
+                  <span class="w-9 text-center text-sm font-extrabold ${inStock ? 'text-slate-900 dark:text-white' : 'text-red-600 dark:text-red-400'}">${item.qty}</span>
+                  <button type="button" data-qty-id="${item.id}" data-delta="1" class="qty-btn w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200">+</button>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5">
+                ${item.models.map((m) => `<span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium">${escapeHtml(m)}</span>`).join('')}
+              </div>
+
+              <div class="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" data-del-id="${item.id}" class="del-btn text-xs font-bold text-red-600 dark:text-red-400 hover:underline">Delete Box</button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const res = reader.result;
+            const base64 = res.split(',')[1];
+            resolve({ base64, dataUrl: res, mimeType: file.type || 'image/jpeg' });
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function callGeminiVision(base64, mimeType, promptText) {
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+        let lastErr = null;
+        for (const modelName of modelsToTry) {
+          try {
+            const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + encodeURIComponent(geminiApiKey);
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: promptText },
+                    { inlineData: { mimeType, data: base64 } }
+                  ]
+                }]
+              })
+            });
+            if (!res.ok) {
+              lastErr = new Error('API ' + res.status);
+              continue;
+            }
+            const data = await res.json();
+            const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (txt) return txt;
+          } catch (e) {
+            lastErr = e;
+          }
+        }
+        throw lastErr || new Error('Gemini API error');
+      }
+
+      function cleanExtractedModels(rawText) {
+        const lines = rawText
+          .split(/[\n,;•|/]+/)
+          .map((s) => s.replace(/^[-*\d.)\s]+/, '').trim())
+          .filter((s) => s.length >= 3 && s.length <= 45);
+        return Array.from(new Set(lines));
+      }
+
+      function exportBackup() {
+        const blob = new Blob([JSON.stringify(inventory, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'royal-hub-backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Royal Hub backup download ho gaya!');
+      }
+
+      async function handlePhonePhoto(file) {
+        if (!file) return;
+        const { base64, dataUrl, mimeType } = await fileToBase64(file);
+        document.getElementById('phonePreviewImg').src = dataUrl;
+        document.getElementById('phonePreviewWrap').classList.remove('hidden');
+        const statusEl = document.getElementById('phoneScanStatus');
+
+        if (geminiApiKey) {
+          statusEl.textContent = 'AI phone ka camera aur design dekh kar model pehchan raha hai...';
+          try {
+            const reply = await callGeminiVision(
+              base64,
+              mimeType,
+              'Identify the exact smartphone brand and model shown in this photo (e.g. "Vivo V29", "Redmi Note 12", "iPhone 15"). Reply with ONLY the brand and model name, nothing else.'
+            );
+            const detected = reply.replace(/[*`"'.]/g, '').trim();
+            checkInput.value = detected;
+            renderCheckResults(detected);
+            statusEl.textContent = 'AI ne model pehchana: ' + detected;
+            showToast('Detected: ' + detected);
+          } catch (err) {
+            statusEl.textContent = 'AI scan fail hua. Settings me Gemini Key check karein ya upar model likh kar Check dabayein.';
+            showToast('AI scan error — key check karein', true);
+          }
+        } else {
+          statusEl.textContent = 'OCR se photo me likha text padh raha hai...';
+          try {
+            const res = await window.Tesseract.recognize(dataUrl, 'eng');
+            const text = (res?.data?.text || '').replace(/\s+/g, ' ').trim();
+            if (text.length > 2) {
+              const snippet = text.slice(0, 35);
+              checkInput.value = snippet;
+              renderCheckResults(snippet);
+              statusEl.textContent = 'Photo text mila: "' + snippet + '". Agar phone ke back ki photo thi, toh Settings me Gemini Key daalein ya upar model (jaise V29) likh kar Check dabayein.';
+            } else {
+              statusEl.textContent = 'Phone ki back photo par text nahi mila! Phone ke design se model pehchanne ke liye Settings me free Gemini API Key daalein, ya upar model naam (jaise V29) likh kar Check dabayein.';
+              showToast('Phone design scan ke liye Settings me Gemini Key daalein', true);
+            }
+          } catch (err) {
+            statusEl.textContent = 'Photo upload ho gayi. Model ka naam upar likh kar Check dabayein.';
+          }
+        }
+      }
+
+      function handlePacketPhoto(file) {
+        if (!file) return;
+        currentPacketFile = file;
+        fileToBase64(file).then(({ dataUrl }) => {
+          document.getElementById('packetPreviewImg').src = dataUrl;
+          document.getElementById('packetPreviewWrap').classList.remove('hidden');
+          document.getElementById('scanPacketBtn').classList.remove('hidden');
+          showToast('Photo ready! Ab "Photo se Models Padho" dabaiye.');
+        });
+      }
+
+      // Event Listeners: Tabs
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+      });
+
+      // Check Search + Check Button + Quick Brand Chips
+      const checkInput = document.getElementById('checkSearchInput');
+      checkInput.addEventListener('input', () => renderCheckResults(checkInput.value));
+      document.getElementById('manualCheckBtn').addEventListener('click', () => {
+        if (!checkInput.value.trim()) {
+          showToast('Pehle model ka naam likhein (jaise: V29)', true);
+          checkInput.focus();
+          return;
+        }
+        renderCheckResults(checkInput.value);
+      });
+      document.getElementById('clearCheckBtn').addEventListener('click', () => {
+        checkInput.value = '';
+        document.getElementById('phonePreviewWrap').classList.add('hidden');
+        renderCheckResults('');
+      });
+
+      document.querySelectorAll('.quick-brand-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          checkInput.value = btn.getAttribute('data-quick-brand');
+          checkInput.focus();
+          renderCheckResults(checkInput.value);
+        });
+      });
+
+      // Buy / Not Buy from Check Result
+      document.getElementById('checkResultsContainer').addEventListener('click', (e) => {
+        const buyBtn = e.target.closest('.sell-one-btn');
+        if (buyBtn) {
+          const id = buyBtn.getAttribute('data-sell-id');
+          const found = inventory.find((x) => x.id === id);
+          if (found && found.qty > 0) {
+            found.qty -= 1;
+            saveState();
+            updateCounts();
+            renderCheckResults(checkInput.value);
+            showToast('Buy! ' + found.code + ' se 1 glass cut gaya.');
+          }
+          return;
+        }
+        const notBuyBtn = e.target.closest('.not-buy-btn');
+        if (notBuyBtn) {
+          checkInput.value = '';
+          document.getElementById('phonePreviewWrap').classList.add('hidden');
+          renderCheckResults('');
+          showToast('Not Buy — Inventory se glass nahi kata.');
+        }
+      });
+
+      // Customer Phone Camera & Gallery
+      document.getElementById('pickPhoneCameraBtn').addEventListener('click', () => {
+        document.getElementById('phoneCameraInput').click();
+      });
+      document.getElementById('pickPhoneGalleryBtn').addEventListener('click', () => {
+        document.getElementById('phoneGalleryInput').click();
+      });
+      document.getElementById('phoneCameraInput').addEventListener('change', (e) => handlePhonePhoto(e.target.files?.[0]));
+      document.getElementById('phoneGalleryInput').addEventListener('change', (e) => handlePhonePhoto(e.target.files?.[0]));
+
+      // Add Glass: Packet Camera & Gallery
+      document.getElementById('pickPacketCameraBtn').addEventListener('click', () => {
+        document.getElementById('packetCameraInput').click();
+      });
+      document.getElementById('pickPacketGalleryBtn').addEventListener('click', () => {
+        document.getElementById('packetGalleryInput').click();
+      });
+      document.getElementById('packetCameraInput').addEventListener('change', (e) => handlePacketPhoto(e.target.files?.[0]));
+      document.getElementById('packetGalleryInput').addEventListener('change', (e) => handlePacketPhoto(e.target.files?.[0]));
+
+      document.getElementById('scanPacketBtn').addEventListener('click', async () => {
+        if (!currentPacketFile) return;
+        const progWrap = document.getElementById('ocrProgressWrap');
+        const progBar = document.getElementById('ocrProgressBar');
+        const progText = document.getElementById('ocrProgressText');
+        progWrap.classList.remove('hidden');
+        progBar.style.width = '15%';
+        progText.textContent = 'Packet photo padh raha hai...';
+
+        try {
+          const { base64, dataUrl, mimeType } = await fileToBase64(currentPacketFile);
+          let models = [];
+
+          if (geminiApiKey) {
+            progBar.style.width = '55%';
+            progText.textContent = 'Gemini AI models nikal raha hai...';
+            const aiText = await callGeminiVision(
+              base64,
+              mimeType,
+              'Read all compatible mobile phone model names printed on this tempered glass box/packet. Return ONLY a comma-separated list of model names.'
+            );
+            models = cleanExtractedModels(aiText);
+          } else {
+            const result = await window.Tesseract.recognize(dataUrl, 'eng', {
+              logger: (m) => {
+                if (m.status === 'recognizing text') {
+                  const pct = Math.round((m.progress || 0) * 100);
+                  progBar.style.width = Math.max(20, pct) + '%';
+                  progText.textContent = 'Text padh raha hai: ' + pct + '%';
+                }
+              }
+            });
+            models = cleanExtractedModels(result?.data?.text || '');
+          }
+
+          progBar.style.width = '100%';
+          if (models.length > 0) {
+            document.getElementById('glassModelsInput').value = models.join(', ');
+            progText.textContent = models.length + ' model names mil gaye!';
+            showToast(models.length + ' models extract ho gaye!');
+          } else {
+            progText.textContent = 'Saaf text nahi mila — kripya neeche models type karein.';
+            showToast('Saaf text nahi mila, photo thodi paas se lein.', true);
+          }
+        } catch (err) {
+          progText.textContent = 'Scan me error aaya. Manually models likh dein.';
+          showToast('Scan fail hua', true);
+        }
+      });
+
+      document.getElementById('fillSamplePacketBtn').addEventListener('click', () => {
+        document.getElementById('glassCodeInput').value = '11D-R13';
+        document.getElementById('glassModelsInput').value =
+          'Redmi Note 13 5G, Redmi Note 13 Pro, Poco X6 Neo, Realme 12 5G, Realme Narzo 70, Vivo T3 5G, iQOO Z9 5G, Samsung M35, Moto G64, Nothing Phone 2a';
+        showToast('10 sample models bhar diye gaye!');
+      });
+
+      // Save New Glass Form
+      document.getElementById('addGlassForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = document.getElementById('glassCodeInput').value.trim();
+        const type = document.getElementById('glassTypeInput').value;
+        const qty = parseInt(document.getElementById('glassQtyInput').value, 10) || 0;
+        const rack = document.getElementById('glassRackInput').value.trim();
+        const price = parseInt(document.getElementById('glassPriceInput').value, 10) || 0;
+        const modelsRaw = document.getElementById('glassModelsInput').value;
+        const models = cleanExtractedModels(modelsRaw);
+
+        if (!code || models.length === 0) {
+          showToast('Glass Code aur kam se kam 1 Model zaroori hai.', true);
+          return;
+        }
+
+        inventory.unshift({
+          id: 'g_' + Date.now(),
+          code,
+          type,
+          qty,
+          rack: rack || 'Main Counter',
+          price,
+          models
+        });
+        saveState();
+        updateCounts();
+        e.target.reset();
+        document.getElementById('glassQtyInput').value = '10';
+        document.getElementById('glassPriceInput').value = '150';
+        document.getElementById('packetPreviewWrap').classList.add('hidden');
+        document.getElementById('scanPacketBtn').classList.add('hidden');
+        document.getElementById('ocrProgressWrap').classList.add('hidden');
+        currentPacketFile = null;
+        showToast(code + ' (' + models.length + ' models) save ho gaya!');
+        switchTab('inventory');
+      });
+
+      // Inventory Actions
+      document.getElementById('invFilterInput').addEventListener('input', renderInventory);
+
+      document.getElementById('inventoryListContainer').addEventListener('click', (e) => {
+        const qtyBtn = e.target.closest('.qty-btn');
+        if (qtyBtn) {
+          const id = qtyBtn.getAttribute('data-qty-id');
+          const delta = parseInt(qtyBtn.getAttribute('data-delta'), 10);
+          const item = inventory.find((x) => x.id === id);
+          if (item) {
+            item.qty = Math.max(0, (Number(item.qty) || 0) + delta);
+            saveState();
+            renderInventory();
+          }
+          return;
+        }
+        const delBtn = e.target.closest('.del-btn');
+        if (delBtn) {
+          const id = delBtn.getAttribute('data-del-id');
+          inventory = inventory.filter((x) => x.id !== id);
+          saveState();
+          renderInventory();
+          showToast('Glass box delete ho gaya.');
+        }
+      });
+
+      document.getElementById('resetDemoBtn').addEventListener('click', () => {
+        inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+        saveState();
+        renderInventory();
+        showToast('Demo inventory reset ho gayi.');
+      });
+
+      document.getElementById('exportJsonBtn').addEventListener('click', exportBackup);
+      document.getElementById('settingsExportBtn').addEventListener('click', exportBackup);
+
+      // Theme & Settings Modal
+      document.getElementById('quickThemeBtn').addEventListener('click', () => {
+        applyTheme(!isDark);
+        showToast(isDark ? 'Dark Theme on ho gaya' : 'Light Theme on ho gaya');
+      });
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        applyTheme(!isDark);
+        showToast(isDark ? 'Dark Theme on ho gaya' : 'Light Theme on ho gaya');
+      });
+
+      const modal = document.getElementById('settingsModal');
+      document.getElementById('openSettingsBtn').addEventListener('click', () => {
+        document.getElementById('apiKeyInput').value = geminiApiKey;
+        modal.classList.remove('hidden');
+      });
+      document.getElementById('closeSettingsBtn').addEventListener('click', () => modal.classList.add('hidden'));
+      document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
+        geminiApiKey = document.getElementById('apiKeyInput').value.trim();
+        try { localStorage.setItem(API_KEY_STORAGE, geminiApiKey); } catch (e) {}
+        updateAiStatusUI();
+        modal.classList.add('hidden');
+        showToast(geminiApiKey ? 'Gemini AI Key save ho gayi!' : 'Key khali chhodi gayi.');
+      });
+      document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
+        geminiApiKey = '';
+        document.getElementById('apiKeyInput').value = '';
+        try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {}
+        updateAiStatusUI();
+        modal.classList.add('hidden');
+        showToast('API Key hata di gayi.');
+      });
+
+      // Init
+      loadState();
+      updateAiStatusUI();
+      updateCounts();
+      renderCheckResults('');
+    })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
